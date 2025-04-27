@@ -1,0 +1,32 @@
+import numpy as np
+import pandas as pd
+from pgmpy.models import BayesianNetwork
+from pgmpy.estimators import MaximumLikelihoodEstimator
+from pgmpy.inference import VariableElimination
+
+model = BayesianNetwork([
+    ('Fever', 'Corona Diagnosis'),
+    ('Cough', 'Corona Diagnosis'),
+    ('Sore Throat', 'Corona Diagnosis'),
+    ('Shortness of Breath', 'Corona Diagnosis'),
+    ('Loss of Taste/Smell', 'Corona Diagnosis')
+])
+
+data = pd.read_csv('CORONA.csv')
+model.fit(data, estimator=MaximumLikelihoodEstimator)
+
+print(f"Dataset Shape: {data.shape}")
+print(data.head())
+
+inference = VariableElimination(model)
+evidence = {
+    'Fever': 'Yes',
+    'Cough': 'Yes',
+    'Shortness of Breath': 'Yes',
+    'Loss of Taste/Smell': 'Yes'
+}
+
+result = inference.query(variables=['Corona Diagnosis'], evidence=evidence)
+
+print("\nProbability distribution for Corona Diagnosis given the evidence:")
+print(result)
